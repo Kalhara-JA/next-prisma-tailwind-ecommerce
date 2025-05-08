@@ -9,14 +9,14 @@ datasource db {
 
 model User {
   id    String  @id @default(cuid())
-  email String?  @unique
+  email String? @unique
   phone String? @unique
 
   name     String?
   birthday String?
 
   OTP                   String?
-  emailUnsubscribeToken String?  @unique @default(cuid())
+  emailUnsubscribeToken String? @unique @default(cuid())
   referralCode          String? @unique
 
   isBanned          Boolean @default(false)
@@ -90,8 +90,6 @@ model Brand {
   title       String  @unique
   description String?
   logo        String?
-
-  products Product[]
 }
 
 model Product {
@@ -106,7 +104,6 @@ model Product {
   discount Float @default(0)
   stock    Int   @default(0)
 
-  isPhysical  Boolean @default(true)
   isAvailable Boolean @default(false)
   isFeatured  Boolean @default(false)
 
@@ -115,15 +112,10 @@ model Product {
   wishlists      User[]          @relation("Wishlist")
   productReviews ProductReview[]
 
-  brand   Brand  @relation(fields: [brandId], references: [id])
-  brandId String
-
   categories Category[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([brandId])
 }
 
 model Category {

@@ -2,7 +2,8 @@ import prisma from '@/lib/prisma'
 
 import { BrandForm } from './components/brand-form'
 
-const BrandPage = async ({ params }: { params: { brandId: string } }) => {
+const BrandPage = async (props: { params: Promise<{ brandId: string }> }) => {
+   const params = await props.params;
    const brand = await prisma.brand.findUnique({
       where: {
          id: params.brandId,

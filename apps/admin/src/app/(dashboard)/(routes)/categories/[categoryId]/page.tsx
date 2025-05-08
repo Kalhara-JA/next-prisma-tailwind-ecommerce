@@ -2,14 +2,18 @@ import prisma from '@/lib/prisma'
 
 import { CategoryForm } from './components/category-form'
 
-const CategoryPage = async ({
-   params,
-}: {
-   params: { categoryId: string; id: string }
-}) => {
+const CategoryPage = async (
+   props: {
+      params: Promise<{ categoryId: string; id: string }>
+   }
+) => {
+   const params = await props.params;
    const category = await prisma.category.findUnique({
       where: {
          id: params.categoryId,
+      },
+      include: {
+         banners: true,
       },
    })
 

@@ -13,7 +13,8 @@ import type { OrderColumn } from '../../orders/components/table'
 import { OrderTable } from '../../orders/components/table'
 import { UserForm } from './components/user-form'
 
-const UserPage = async ({ params }: { params: { userId: string } }) => {
+const UserPage = async (props: { params: Promise<{ userId: string }> }) => {
+   const params = await props.params;
    const user = await prisma.user.findUnique({
       where: {
          id: params.userId,

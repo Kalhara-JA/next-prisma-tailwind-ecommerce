@@ -2,7 +2,8 @@ import prisma from '@/lib/prisma'
 
 import { BannerForm } from './components/banner-form'
 
-const Page = async ({ params }: { params: { bannerId: string } }) => {
+const Page = async (props: { params: Promise<{ bannerId: string }> }) => {
+   const params = await props.params;
    const banner = await prisma.banner.findUnique({
       where: {
          id: params.bannerId,

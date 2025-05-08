@@ -7,7 +7,8 @@ import { SortBy } from './components/options'
 import type { OrderColumn } from './components/table'
 import { OrderTable } from './components/table'
 
-export default async function OrdersPage({ searchParams }) {
+export default async function OrdersPage(props) {
+   const searchParams = await props.searchParams;
    const {
       userId,
       sort,

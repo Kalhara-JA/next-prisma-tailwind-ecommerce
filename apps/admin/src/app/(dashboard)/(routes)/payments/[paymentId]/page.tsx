@@ -17,11 +17,12 @@ import { PaymentClient } from '../components/client'
 import type { PaymentColumn } from '../components/columns'
 import { PaymentForm } from './components/payment-form'
 
-export default async function PaymentPage({
-   params,
-}: {
-   params: { paymentId: string }
-}) {
+export default async function PaymentPage(
+   props: {
+      params: Promise<{ paymentId: string }>
+   }
+) {
+   const params = await props.params;
    const payment = await prisma.payment.findUnique({
       where: {
          id: params.paymentId,

@@ -1,19 +1,49 @@
+// app/api/products/route.ts
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
    try {
       const userId = req.headers.get('X-USER-ID')
-
       if (!userId) {
          return new NextResponse('Unauthorized', { status: 401 })
       }
 
-      const { data } = await req.json()
+      // parse all form fields directly
+      const {
+         title,
+         images,
+         price,
+         discount = 0,
+         stock = 0,
+         categoryId,
+         isFeatured = false,
+         isAvailable = false,
+      } = await req.json()
 
-      const products = await prisma.product.findMany()
+      if (!title || !categoryId) {
+         return new NextResponse('Missing title or category', { status: 400 })
+      }
 
-      return NextResponse.json(products)
+      // actually create the product
+      const product = await prisma.product.create({
+         data: {
+            title,
+            images, // string[]
+            price,
+            discount,
+            stock,
+            categories: {
+               connect: {
+                  id: categoryId,
+               },
+            },
+            isFeatured,
+            isAvailable,
+         },
+      })
+
+      return NextResponse.json(product)
    } catch (error) {
       console.error('[PRODUCTS_POST]', error)
       return new NextResponse('Internal error', { status: 500 })
@@ -23,16 +53,25 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
    try {
       const userId = req.headers.get('X-USER-ID')
-
       if (!userId) {
          return new NextResponse('Unauthorized', { status: 401 })
       }
 
       const { searchParams } = new URL(req.url)
       const categoryId = searchParams.get('categoryId') || undefined
-      const isFeatured = searchParams.get('isFeatured')
+      const isFeaturedParam = searchParams.get('isFeatured')
 
-      const products = await prisma.product.findMany()
+      // build a dynamic where object
+      const where: any = {}
+      if (categoryId) where.categoryId = categoryId
+      if (isFeaturedParam !== null) {
+         where.isFeatured = isFeaturedParam === 'true'
+      }
+
+      const products = await prisma.product.findMany({
+         where,
+         orderBy: { createdAt: 'desc' },
+      })
 
       return NextResponse.json(products)
    } catch (error) {

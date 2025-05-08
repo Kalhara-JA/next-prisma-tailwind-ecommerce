@@ -26,6 +26,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
    }, [])
 
    const onUpload = (result: any) => {
+      console.log(result.info.secure_url)
       onChange(result.info.secure_url)
    }
 
@@ -61,7 +62,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                </div>
             ))}
          </div>
-         <CldUploadWidget onUpload={onUpload} uploadPreset="t4drjppf">
+         <CldUploadWidget onSuccess={onUpload} uploadPreset="store-backend">
             {({ open }) => {
                const onClick = () => {
                   open()

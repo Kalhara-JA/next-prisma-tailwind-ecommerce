@@ -68,21 +68,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
    const defaultValues = initialData
       ? {
-           ...initialData,
-           price: parseFloat(String(initialData?.price.toFixed(2))),
-           discount: parseFloat(String(initialData?.discount.toFixed(2))),
-        }
+         ...initialData,
+         price: parseFloat(String(initialData?.price.toFixed(2))),
+         discount: parseFloat(String(initialData?.discount.toFixed(2))),
+      }
       : {
-           title: '---',
-           description: '---',
-           images: [],
-           price: 0,
-           discount: 0,
-           stock: 0,
-           categoryId: '---',
-           isFeatured: false,
-           isAvailable: false,
-        }
+         title: '---',
+         description: '---',
+         images: [],
+         price: 0,
+         discount: 0,
+         stock: 0,
+         categoryId: '---',
+         isFeatured: false,
+         isAvailable: false,
+      }
 
    const form = useForm<ProductFormValues>({
       resolver: zodResolver(formSchema),
@@ -100,6 +100,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                cache: 'no-store',
             })
          } else {
+            console.log('Creating product')
+            console.log(data)
             await fetch(`/api/products`, {
                method: 'POST',
                body: JSON.stringify(data),
@@ -137,6 +139,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       }
    }
 
+   console.log('Initial data', initialData)
+   console.log('Default values', defaultValues)
+   console.log('Form values', form.getValues())
+
    return (
       <>
          <AlertModal
@@ -172,10 +178,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         <FormLabel>Images</FormLabel>
                         <FormControl>
                            <ImageUpload
-                              value={field.value.map((image) => image)}
+                              value={field.value}
                               disabled={loading}
-                              onChange={(url) =>
-                                 field.onChange([...field.value, { url }])
+                              onChange={(url) => {
+                                 console.log('Image URL', url)
+                                 field.onChange([...field.value, url])
+                              }
                               }
                               onRemove={(url) =>
                                  field.onChange([

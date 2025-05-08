@@ -11,6 +11,7 @@ export default async function CategoriesPage() {
    const categories = await prisma.category.findMany({
       include: {
          products: true,
+         banners: true,
       },
    })
 
