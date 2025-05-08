@@ -7,7 +7,8 @@ import { serialize } from 'next-mdx-remote/serialize'
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default async function Blog({ params }: { params: { slug: string } }) {
+export default async function Blog(props: { params: Promise<{ slug: string }> }) {
+   const params = await props.params;
    const blog = await prisma.blog.findUnique({
       where: {
          slug: params.slug,

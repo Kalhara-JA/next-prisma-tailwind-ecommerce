@@ -17,7 +17,8 @@ export async function generateStaticParams() {
    return paths
 }
 
-export default async function Page({ params }) {
+export default async function Page(props) {
+   const params = await props.params;
    const { emails, filenames } = await getEmails()
    const template = filenames.filter((email) => {
       const [fileName] = email.split('.')
@@ -47,6 +48,7 @@ export default async function Page({ params }) {
    )
 }
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata(props) {
+   const params = await props.params;
    return { title: `${params.slug} — React Email` }
 }

@@ -8,14 +8,16 @@ import {
    CardHeader,
    CardTitle,
 } from '@/components/ui/card'
-import { ProductWithIncludes } from '@/types/prisma'
 import Image from 'next/image'
 import Link from 'next/link'
+import type { Product as PrismaProduct, Category } from '@prisma/client'
+
+export type ProductWithCategories = PrismaProduct & { categories: Category[] }
 
 export const ProductGrid = ({
    products,
 }: {
-   products: ProductWithIncludes[]
+   products: ProductWithCategories[]
 }) => {
    return (
       <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
@@ -36,7 +38,7 @@ export const ProductSkeletonGrid = () => {
    )
 }
 
-export const Product = ({ product }: { product: ProductWithIncludes }) => {
+export const Product = ({ product }: { product: ProductWithCategories }) => {
    function Price() {
       if (product?.discount > 0) {
          const price = product?.price - product?.discount

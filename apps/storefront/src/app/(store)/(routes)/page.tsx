@@ -13,7 +13,6 @@ import { isVariableValid } from '@/lib/utils'
 export default async function Index() {
    const products = await prisma.product.findMany({
       include: {
-         brand: true,
          categories: true,
       },
    })

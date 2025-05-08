@@ -33,12 +33,6 @@ export const DataSection = async ({
       <div className="col-span-2 w-full rounded-lg bg-neutral-100 p-6 dark:bg-neutral-900">
          <h3 className="mb-4 text-xl font-medium">{product.title}</h3>
          <Separator />
-         <div className="flex gap-2 mb-2 items-center">
-            <p className="text-sm">Brand:</p>
-            <Link href={`/products?brand=${product?.brand?.title}`}>
-               <Badge variant="outline">{product?.brand?.title}</Badge>
-            </Link>
-         </div>
          <div className="flex gap-2 items-center">
             <p className="text-sm">Categories:</p>
             {product.categories.map(({ title }, index) => (

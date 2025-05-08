@@ -1,10 +1,8 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
-export async function GET(
-   req: Request,
-   { params }: { params: { productId: string } }
-) {
+export async function GET(req: Request, props: { params: Promise<{ productId: string }> }) {
+   const params = await props.params;
    try {
       if (!params.productId) {
          return new NextResponse('Product id is required', { status: 400 })

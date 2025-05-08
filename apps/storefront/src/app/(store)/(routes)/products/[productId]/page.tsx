@@ -8,14 +8,12 @@ import Link from 'next/link'
 import { DataSection } from './components/data'
 
 type Props = {
-   params: { productId: string }
-   searchParams: { [key: string]: string | string[] | undefined }
+   params: Promise<{ productId: string }>
+   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export async function generateMetadata(
-   { params, searchParams }: Props,
-   parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+   const params = await props.params;
    const product = await prisma.product.findUnique({
       where: {
          id: params.productId,
@@ -32,17 +30,17 @@ export async function generateMetadata(
    }
 }
 
-export default async function Product({
-   params,
-}: {
-   params: { productId: string }
-}) {
+export default async function Product(
+   props: {
+      params: Promise<{ productId: string }>
+   }
+) {
+   const params = await props.params;
    const product = await prisma.product.findUnique({
       where: {
          id: params.productId,
       },
       include: {
-         brand: true,
          categories: true,
       },
    })
