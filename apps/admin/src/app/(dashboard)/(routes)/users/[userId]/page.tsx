@@ -35,6 +35,7 @@ const UserPage = async (props: { params: Promise<{ userId: string }> }) => {
    })
 
    function OrdersCard() {
+      if (!user) return null;
       const { orders } = user
 
       const formattedOrders: OrderColumn[] = orders.map((order) => ({

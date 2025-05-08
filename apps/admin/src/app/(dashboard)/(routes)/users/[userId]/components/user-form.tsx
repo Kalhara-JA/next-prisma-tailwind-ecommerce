@@ -44,7 +44,10 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
 
    const defaultValues = initialData
       ? {
-           ...initialData,
+           name: initialData.name ?? '',
+           phone: initialData.phone ?? '',
+           email: initialData.email ?? '',
+           isBanned: initialData.isBanned ?? false,
         }
       : {
            name: '---',
@@ -63,13 +66,13 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
          setLoading(true)
 
          if (initialData) {
-            await fetch(`/api/products/${params.productId}`, {
+            await fetch(`/api/users/${params.userId}`, {
                method: 'PATCH',
                body: JSON.stringify(data),
                cache: 'no-store',
             })
          } else {
-            await fetch(`/api/products`, {
+            await fetch(`/api/users`, {
                method: 'POST',
                body: JSON.stringify(data),
                cache: 'no-store',
@@ -77,7 +80,7 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
          }
 
          router.refresh()
-         router.push(`/products`)
+         router.push(`/users`)
          toast.success(toastMessage)
       } catch (error: any) {
          toast.error('Something went wrong.')

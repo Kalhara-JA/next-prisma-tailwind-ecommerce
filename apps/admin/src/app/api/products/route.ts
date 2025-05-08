@@ -14,32 +14,36 @@ export async function POST(req: Request) {
          title,
          images,
          price,
-         discount = 0,
-         stock = 0,
-         categoryId,
-         isFeatured = false,
-         isAvailable = false,
+         discount,
+         stock,
+         categoryIds,
+         isFeatured,
+         isAvailable,
+         description,
+         keywords,
+         metadata,
       } = await req.json()
 
-      if (!title || !categoryId) {
-         return new NextResponse('Missing title or category', { status: 400 })
+      if (!title || !Array.isArray(categoryIds) || categoryIds.length === 0) {
+         return new NextResponse('Missing title or categories', { status: 400 })
       }
 
       // actually create the product
       const product = await prisma.product.create({
          data: {
             title,
-            images, // string[]
+            images,
             price,
             discount,
             stock,
             categories: {
-               connect: {
-                  id: categoryId,
-               },
+               connect: categoryIds.map((id: string) => ({ id })),
             },
             isFeatured,
             isAvailable,
+            description,
+            keywords,
+            metadata,
          },
       })
 

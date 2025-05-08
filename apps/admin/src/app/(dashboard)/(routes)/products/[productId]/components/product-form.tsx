@@ -32,14 +32,18 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import * as z from 'zod'
+import { MultiSelect } from '@/components/ui/multi-select'
 
 const formSchema = z.object({
    title: z.string().min(1),
+   description: z.string().optional(),
    images: z.string().array(),
    price: z.coerce.number().min(1),
    discount: z.coerce.number().min(0),
    stock: z.coerce.number().min(0),
-   categoryId: z.string().min(1),
+   keywords: z.string().array().optional(),
+   metadata: z.string().optional(),
+   categoryIds: z.string().array().min(1),
    isFeatured: z.boolean().default(false).optional(),
    isAvailable: z.boolean().default(false).optional(),
 })
@@ -71,15 +75,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
          ...initialData,
          price: parseFloat(String(initialData?.price.toFixed(2))),
          discount: parseFloat(String(initialData?.discount.toFixed(2))),
+         categoryIds: initialData.categories?.map((c) => c.id) || [],
+         description: initialData.description || '',
+         keywords: initialData.keywords || [],
+         metadata: initialData.metadata ? JSON.stringify(initialData.metadata, null, 2) : '',
       }
       : {
-         title: '---',
-         description: '---',
+         title: '',
+         description: '',
          images: [],
          price: 0,
          discount: 0,
          stock: 0,
-         categoryId: '---',
+         keywords: [],
+         metadata: '',
+         categoryIds: [],
          isFeatured: false,
          isAvailable: false,
       }
@@ -92,23 +102,28 @@ export const ProductForm: React.FC<ProductFormProps> = ({
    const onSubmit = async (data: ProductFormValues) => {
       try {
          setLoading(true)
-
+         let metadataObj = {}
+         if (data.metadata && typeof data.metadata === 'string') {
+            try {
+               metadataObj = JSON.parse(data.metadata)
+            } catch {
+               metadataObj = {}
+            }
+         }
+         const payload = { ...data, metadata: metadataObj }
          if (initialData) {
             await fetch(`/api/products/${params.productId}`, {
                method: 'PATCH',
-               body: JSON.stringify(data),
+               body: JSON.stringify(payload),
                cache: 'no-store',
             })
          } else {
-            console.log('Creating product')
-            console.log(data)
             await fetch(`/api/products`, {
                method: 'POST',
-               body: JSON.stringify(data),
+               body: JSON.stringify(payload),
                cache: 'no-store',
             })
          }
-
          router.refresh()
          router.push(`/products`)
          toast.success(toastMessage)
@@ -181,10 +196,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                               value={field.value}
                               disabled={loading}
                               onChange={(url) => {
-                                 console.log('Image URL', url)
-                                 field.onChange([...field.value, url])
-                              }
-                              }
+                                 field.onChange([...(field.value || []), url])
+                              }}
                               onRemove={(url) =>
                                  field.onChange([
                                     ...field.value.filter(
@@ -272,35 +285,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   />
                   <FormField
                      control={form.control}
-                     name="categoryId"
+                     name="categoryIds"
                      render={({ field }) => (
                         <FormItem>
-                           <FormLabel>Category</FormLabel>
-                           <Select
-                              disabled={loading}
-                              onValueChange={field.onChange}
-                              value={field.value}
-                              defaultValue={field.value}
-                           >
-                              <FormControl>
-                                 <SelectTrigger>
-                                    <SelectValue
-                                       defaultValue={field.value}
-                                       placeholder="Select a category"
-                                    />
-                                 </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                 {categories.map((category) => (
-                                    <SelectItem
-                                       key={category.id}
-                                       value={category.id}
-                                    >
-                                       {category.title}
-                                    </SelectItem>
-                                 ))}
-                              </SelectContent>
-                           </Select>
+                           <FormLabel>Categories</FormLabel>
+                           <FormControl>
+                              <MultiSelect
+                                 options={categories.map((category) => ({
+                                    label: category.title,
+                                    value: category.id,
+                                 }))}
+                                 defaultValue={field.value}
+                                 onValueChange={field.onChange}
+                                 placeholder="Select categories"
+                                 maxCount={5}
+                                 animation={0.5}
+                              />
+                           </FormControl>
                            <FormMessage />
                         </FormItem>
                      )}
@@ -342,6 +343,60 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                  This product will appear in the store.
                               </FormDescription>
                            </div>
+                        </FormItem>
+                     )}
+                  />
+                  <FormField
+                     control={form.control}
+                     name="description"
+                     render={({ field }) => (
+                        <FormItem>
+                           <FormLabel>Description</FormLabel>
+                           <FormControl>
+                              <Input
+                                 disabled={loading}
+                                 placeholder="Product description"
+                                 {...field}
+                              />
+                           </FormControl>
+                           <FormMessage />
+                        </FormItem>
+                     )}
+                  />
+                  <FormField
+                     control={form.control}
+                     name="keywords"
+                     render={({ field }) => (
+                        <FormItem>
+                           <FormLabel>Keywords</FormLabel>
+                           <FormControl>
+                              <Input
+                                 disabled={loading}
+                                 placeholder="Comma separated keywords"
+                                 value={field.value?.join(', ') || ''}
+                                 onChange={e => field.onChange(e.target.value.split(',').map(k => k.trim()).filter(Boolean))}
+                              />
+                           </FormControl>
+                           <FormMessage />
+                        </FormItem>
+                     )}
+                  />
+                  <FormField
+                     control={form.control}
+                     name="metadata"
+                     render={({ field }) => (
+                        <FormItem>
+                           <FormLabel>Metadata (JSON)</FormLabel>
+                           <FormControl>
+                              <textarea
+                                 disabled={loading}
+                                 placeholder={`{\n  "color": "red"\n}`}
+                                 className="w-full min-h-[80px] border rounded p-2 font-mono"
+                                 value={typeof field.value === 'string' ? field.value : ''}
+                                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => field.onChange(e.target.value)}
+                              />
+                           </FormControl>
+                           <FormMessage />
                         </FormItem>
                      )}
                   />
